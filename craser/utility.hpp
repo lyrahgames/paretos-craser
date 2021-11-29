@@ -6,6 +6,6 @@ namespace craser {
 using namespace std;
 using namespace lyrahgames::xstd;
 
-using real = float32;
+using real = float64;
 
 }  // namespace craser

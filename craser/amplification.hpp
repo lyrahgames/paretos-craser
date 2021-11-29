@@ -23,6 +23,11 @@ inline auto pulse_amplification(setup s,
   auto pulse = initial_pulse;
   real pulse_energy;
 
+  vector<real> delta(n);
+  for (size_t z = 0; z < n; ++z)
+    delta[z] = s.crystal_doping_concentration *
+               (inversion[z] - s.laser_beta_eq) / (1 - s.laser_beta_eq);
+
   for (size_t it = 0; it < passes; ++it) {
     //
     vector<real> u(n);
@@ -30,10 +35,12 @@ inline auto pulse_amplification(setup s,
       real integral = 0;
       u[0] = 1;
       for (size_t z = 1; z < n; ++z) {
-        integral += (inversion[z - 1] + inversion[z]) * dz / 2;
-        u[z] = exp(-s.crystal_doping_concentration *
-                   s.laser_emission_cross_section / (1 - s.laser_beta_eq) *
-                   (integral - dz * z * s.laser_beta_eq));
+        integral += (delta[z - 1] + delta[z]) * dz / 2;
+        u[z] = exp(-s.laser_emission_cross_section * integral);
+        // integral += (inversion[z - 1] + inversion[z]) * dz / 2;
+        // u[z] = exp(-s.crystal_doping_concentration *
+        //            s.laser_emission_cross_section / (1 - s.laser_beta_eq) *
+        //            (integral - dz * z * s.laser_beta_eq));
       }
     }
     const auto u_area = u.back();
@@ -53,13 +60,14 @@ inline auto pulse_amplification(setup s,
 
     for (size_t t = 0; t < n; ++t)
       pulse[t] *= (1 - s.losses) / (1 - (1 - u_area) * v[t]);
-    for (size_t z = 0; z < n; ++z)
-      inversion[z] = (1 - s.losses) * (inversion[z] - s.laser_beta_eq) * u[z] /
-                         (u[z] + 1 / v_area - 1) +
-                     s.laser_beta_eq;
+    for (size_t z = 0; z < n; ++z)  //
+      delta[z] *= (1 - s.losses) * u[z] / (u[z] + 1 / v_area - 1);
+    //   inversion[z] = (1 - s.losses) * (inversion[z] - s.laser_beta_eq) * u[z] /
+    //                      (u[z] + 1 / v_area - 1) +
+    //                  s.laser_beta_eq;
 
-    for (size_t z = 0; z < (n + 1) / 2; ++z)
-      swap(inversion[z], inversion[n - 1 - z]);
+    for (size_t z = 0; z < (n + 1) / 2; ++z) swap(delta[z], delta[n - 1 - z]);
+    // swap(inversion[z], inversion[n - 1 - z]);
 
     pulse_energy = (pulse[0] + pulse[n - 1]) / 2;
     for (size_t t = 1; t < n - 1; ++t) pulse_energy += pulse[t];
@@ -68,6 +76,11 @@ inline auto pulse_amplification(setup s,
 
     cout << "energy = " << pulse_energy << endl;
   }
+
+  for (size_t z = 0; z < n; ++z)
+    inversion[z] =
+        delta[z] * (1 - s.laser_beta_eq) / s.crystal_doping_concentration +
+        s.laser_beta_eq;
 
   return pair{pulse, pulse_energy};
 }

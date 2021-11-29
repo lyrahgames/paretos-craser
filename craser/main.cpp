@@ -1,3 +1,5 @@
+#include <iomanip>
+//
 #include <fmt/format.h>
 //
 #include <lyrahgames/gnuplot/gnuplot.hpp>
@@ -11,14 +13,17 @@ using namespace lyrahgames;
 int main(int argc, char* argv[]) {
   craser::setup setup{};
   auto inversion = craser::inversion(setup);
-  auto [pulse, energy] = craser::pulse_amplification(setup, inversion, 6);
+  auto [pulse, energy] = craser::pulse_amplification(setup, inversion, 10);
 
   // print("energy = {}\n", energy);
 
   gnuplot::temporary_file file{};
-  for (auto x : pulse) file << x << '\n';
+  for (int i = 0; auto x : inversion) {
+    file << i << ' ' << setprecision(10) << x << '\n';
+    ++i;
+  }
   file.flush();
 
   gnuplot::pipe plot{};
-  plot << format("plot '{}' w l\n", file.path().string());
+  plot << format("plot '{}' u 1:2 w lp\n", file.path().string());
 }
