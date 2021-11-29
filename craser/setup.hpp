@@ -14,6 +14,8 @@ struct crystal {
 };
 
 struct setup {
+  setup() { compute(); }
+
   void compute() {
     pump_intensity = pump_energy / (pump_duration * crystal_area);
     initial_pump_rate = pump_intensity * pump_absorption_cross_section *
@@ -22,11 +24,22 @@ struct setup {
               (pump_absorption_cross_section + pump_emission_cross_section);
     inv_beta_eq = 1 / beta_eq;
     inv_tau_f = 1 / tau_f;
+    seed_fluence = seed_energy / crystal_area;
+    laser_beta_eq =
+        laser_absorption_cross_section /
+        (laser_absorption_cross_section + laser_emission_cross_section);
+  }
+
+  constexpr auto initial_pulse(real t) {
+    return (abs(t) < seed_duration / 2)
+               ? (laser_wavelength / (light_speed * light_speed * planck) *
+                  seed_fluence / seed_duration)
+               : 0;
   }
 
   real planck{6.626e-34};                        //
   real light_speed{3e8};                         // m*s^-1
-  real pump_energy{600.0};                       // J
+  real pump_energy{60.0};                        // J
   real pump_wavelength{940e-9};                  // m
   real pump_duration{2e-3};                      // s
   real pump_absorption_cross_section{0.8e-24};   // m^2
@@ -38,11 +51,16 @@ struct setup {
   real crystal_length{1e-2};                     // m
   real crystal_area{1e-4};                       // m^2
   real tau_f{9.5e-4};                            // s
+  real seed_duration{5e-9};                      // s
+  real seed_energy{1e-2};                        // J
+  real losses{0.02};
 
+  real seed_fluence{};  // J/m^2
   real pump_intensity{};
   real initial_pump_rate{};
   real beta_eq{};
   real inv_beta_eq{};
+  real laser_beta_eq{};
   real inv_tau_f{};
 };
 

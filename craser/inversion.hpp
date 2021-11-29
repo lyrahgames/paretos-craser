@@ -85,7 +85,6 @@ inline auto inversion(setup s) {
     }
     error = sqrt(error) / (n * n);
     ++it;
-    cout << it << endl << error << endl;
   } while ((it < max_iterations) && (error > precision));
 
   vector<real> result(n);
