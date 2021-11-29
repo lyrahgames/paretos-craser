@@ -1,0 +1,11 @@
+libs =
+import libs += fmt%lib{fmt}
+import libs += lyrahgames-xstd%lib{lyrahgames-xstd}
+import libs += lyrahgames-gnuplot%lib{lyrahgames-gnuplot}
+
+exe{craser}: {hxx ixx txx cxx}{**} $libs
+{
+  test = true
+}
+
+cxx.poptions =+ "-I$out_root" "-I$src_root"
