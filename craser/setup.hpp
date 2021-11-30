@@ -1,4 +1,5 @@
 #pragma once
+#include <cmath>
 #include <craser/utility.hpp>
 
 namespace craser {
@@ -28,6 +29,9 @@ struct setup {
     laser_beta_eq =
         laser_absorption_cross_section /
         (laser_absorption_cross_section + laser_emission_cross_section);
+
+    crystal_width = sqrt(crystal_area);
+    crystal_total_reflection_angle = asin(1 / crystal_refractive_index);
   }
 
   constexpr auto initial_pulse(real t) {
@@ -54,7 +58,9 @@ struct setup {
   real seed_duration{5e-9};                      // s
   real seed_energy{1e-2};                        // J
   real losses{0.02};
+  real crystal_refractive_index = 2.4;  //
 
+  real crystal_total_reflection_angle{};
   real seed_fluence{};  // J/m^2
   real pump_intensity{};
   real initial_pump_rate{};
@@ -62,6 +68,7 @@ struct setup {
   real inv_beta_eq{};
   real laser_beta_eq{};
   real inv_tau_f{};
+  real crystal_width{};
 };
 
 }  // namespace craser
