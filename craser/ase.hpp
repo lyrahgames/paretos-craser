@@ -9,11 +9,7 @@
 
 namespace craser {
 
-inline auto travel_length(setup s,
-                          real x,
-                          real y,
-                          real z,
-                          real theta,
+inline auto travel_length(setup s, real x, real y, real z, real theta,
                           real phi) noexcept {
   const auto dir_x = sin(theta) * cos(phi);
   const auto dir_y = sin(theta) * sin(phi);
@@ -40,7 +36,6 @@ inline auto travel_length(setup s,
       min(pair{u, false}, pair{tz_max, true},
           [](const auto& x, const auto& y) { return x.first <= y.first; });
 
-  constexpr auto pi = numbers::pi_v<real>;
   if (!is_z || (theta < s.crystal_total_reflection_angle) ||
       (theta > pi - s.crystal_total_reflection_angle))
     return t;
@@ -57,9 +52,10 @@ inline auto ase(setup s, size_t samples) {
     const auto x = random() * s.crystal_width;
     const auto y = random() * s.crystal_width;
     const auto z = random() * s.crystal_length;
-    constexpr auto pi = numbers::pi_v<real>;
+
     const auto phi = random() * 2 * pi;
     const auto theta = acos(2 * random() - 1);
+
     const real amplification = 1.407602601;
     result += exp(amplification * travel_length(s, x, y, z, theta, phi));
   }

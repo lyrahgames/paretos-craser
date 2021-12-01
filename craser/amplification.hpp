@@ -7,8 +7,7 @@
 
 namespace craser {
 
-inline auto pulse_amplification(setup s,
-                                vector<real>& inversion,
+inline auto pulse_amplification(setup s, vector<real>& inversion,
                                 size_t passes) {
   constexpr size_t n = 200;
   constexpr real precision = 1e-5;
@@ -52,8 +51,8 @@ inline auto pulse_amplification(setup s,
       v[0] = 1;
       for (size_t t = 1; t < n; ++t) {
         integral += (pulse[t - 1] + pulse[t]) * dt / 2;
-        v[t] = exp(-s.light_speed * s.laser_emission_cross_section /
-                   (1 - s.laser_beta_eq) * integral);
+        v[t] = exp(-c * s.laser_emission_cross_section / (1 - s.laser_beta_eq) *
+                   integral);
       }
     }
     const auto v_area = v.back();
@@ -62,7 +61,8 @@ inline auto pulse_amplification(setup s,
       pulse[t] *= (1 - s.losses) / (1 - (1 - u_area) * v[t]);
     for (size_t z = 0; z < n; ++z)  //
       delta[z] *= (1 - s.losses) * u[z] / (u[z] + 1 / v_area - 1);
-    //   inversion[z] = (1 - s.losses) * (inversion[z] - s.laser_beta_eq) * u[z] /
+    //   inversion[z] = (1 - s.losses) * (inversion[z] - s.laser_beta_eq) * u[z]
+    //   /
     //                      (u[z] + 1 / v_area - 1) +
     //                  s.laser_beta_eq;
 
@@ -71,8 +71,7 @@ inline auto pulse_amplification(setup s,
 
     pulse_energy = (pulse[0] + pulse[n - 1]) / 2;
     for (size_t t = 1; t < n - 1; ++t) pulse_energy += pulse[t];
-    pulse_energy *=
-        dt * s.light_speed * s.light_speed * s.planck / s.laser_wavelength;
+    pulse_energy *= dt * c * c * h / s.laser_wavelength;
 
     cout << "energy = " << pulse_energy << endl;
   }

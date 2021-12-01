@@ -20,7 +20,7 @@ struct setup {
   void compute() {
     pump_intensity = pump_energy / (pump_duration * crystal_area);
     initial_pump_rate = pump_intensity * pump_absorption_cross_section *
-                        pump_wavelength / planck / light_speed;
+                        pump_wavelength / h / c;
     beta_eq = pump_absorption_cross_section /
               (pump_absorption_cross_section + pump_emission_cross_section);
     inv_beta_eq = 1 / beta_eq;
@@ -36,13 +36,10 @@ struct setup {
 
   constexpr auto initial_pulse(real t) {
     return (abs(t) < seed_duration / 2)
-               ? (laser_wavelength / (light_speed * light_speed * planck) *
-                  seed_fluence / seed_duration)
+               ? (laser_wavelength / (c * c * h) * seed_fluence / seed_duration)
                : 0;
   }
 
-  real planck{6.626e-34};                        //
-  real light_speed{3e8};                         // m*s^-1
   real pump_energy{60.0};                        // J
   real pump_wavelength{940e-9};                  // m
   real pump_duration{2e-3};                      // s
