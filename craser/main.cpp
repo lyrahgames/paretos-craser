@@ -19,23 +19,31 @@ int main(int argc, char* argv[]) {
   setup.crystal_width = 1.6358204297888304;
   const auto ase = craser::ase(setup, 1'000'000);
 
-  print("ase = {}\n", ase);
+  // print("ase = {}\n", ase);
 
   gnuplot::temporary_file file{};
   // for (int i = 0; auto x : inversion) {
   //   file << i << ' ' << setprecision(10) << x << '\n';
   //   ++i;
   // }
-  const float volume = 4.33;
-  const int n = 100;
-  for (int i = 0; i < n; ++i) {
-    setup.crystal_length = (10.0f - 0.5f) / (n - 1) * i + 0.5f;
-    setup.crystal_width = sqrt(volume / setup.crystal_length);
-    file << setup.crystal_length / setup.crystal_width << ' '
-         << craser::ase(setup, 1'000'000) << '\n';
+  // const float volume = 4.33;
+  // const int n = 100;
+  // for (int i = 0; i < n; ++i) {
+  //   setup.crystal_length = (10.0f - 0.5f) / (n - 1) * i + 0.5f;
+  //   setup.crystal_width = sqrt(volume / setup.crystal_length);
+  //   file << setup.crystal_length / setup.crystal_width << ' '
+  //        << craser::ase(setup, 1'000'000) << '\n';
+  // }
+
+  const size_t n = 500;
+  for (size_t i = 0; i < n; ++i) {
+    const float x = (2.8e-6 - 0.5e-6) / (n - 1) * i + 0.5e-6;
+    const float y = craser::cr_zn_se::emission_cross_section(x);
+    file << x << ' ' << y << '\n';
   }
+
   file.flush();
 
   gnuplot::pipe plot{};
-  plot << format("plot '{}' w l\n", file.path().string());
+  plot << format("plot '{}' u 1:2 w l\n", file.path().string());
 }
