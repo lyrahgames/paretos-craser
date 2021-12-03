@@ -36,14 +36,23 @@ int main(int argc, char* argv[]) {
   // }
 
   const size_t n = 500;
+  const float xmin = 1.0e-6;
+  const float xmax = 4.0e-6;
   for (size_t i = 0; i < n; ++i) {
-    const float x = (2.8e-6 - 0.5e-6) / (n - 1) * i + 0.5e-6;
+    const float x = (xmax - xmin) / (n - 1) * i + xmin;
     const float y = craser::cr_zn_se::emission_cross_section(x);
-    file << x << ' ' << y << '\n';
+    const float z = craser::cr_zn_se::absorption_cross_section(x);
+    const float a = craser::cr_zn_s::absorption_cross_section(x);
+    const float b = craser::cr_zn_s::emission_cross_section(x);
+    file << x << ' ' << y << ' ' << z << ' ' << a << ' ' << b << '\n';
   }
 
   file.flush();
 
   gnuplot::pipe plot{};
-  plot << format("plot '{}' u 1:2 w l\n", file.path().string());
+  plot << format("plot '{}' u 1:2 w l\n", file.path().string())
+       << format("replot '' u 1:3 w l\n")  //
+       << format("replot '' u 1:4 w l\n")  //
+       << format("replot '' u 1:5 w l\n")  //
+      ;
 }
